@@ -1,4 +1,5 @@
 import json
+from os import abort
 from config import db
 from flask import jsonify, request
 
@@ -48,3 +49,17 @@ class User(db.Model):
             "Success":True,
             "Message":"User Added"
         })
+
+    @classmethod
+    def DeleteUser(self,id):
+        user = User.query.get(id)
+        if user is None:
+            abort(404)
+        else:
+            db.session.delete(user)
+            db.session.commit()
+            return jsonify({
+                "Success":True,
+                "message":"User Deleted success"
+            })
+

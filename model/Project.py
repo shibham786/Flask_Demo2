@@ -23,7 +23,7 @@ class Project(db.Model):
         [projects_list.append({"pid":project.pid,"pname":project.pname,"user":project.user_id}) for project in projects]
         return jsonify({
         "success":True,
-        "items":projects_list,
+        "projects":projects_list,
     })
 
     @classmethod

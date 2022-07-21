@@ -10,4 +10,8 @@ def getAllUsers():
 def AddUser():
     return User.AddUser()
 
+@app.route("/DeleteUser/<int:id>",methods=['DELETE'])
+def DeleteUser(id):
+    return User.DeleteUser(id)
+
 
