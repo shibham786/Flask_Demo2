@@ -5,7 +5,7 @@ from controller import User,Project
 
 @app.route("/")
 def welcome():
-    return "Hello Admin"
+    return "Hello Admin  bhai"
 
 @app.before_first_request
 def initfunction():

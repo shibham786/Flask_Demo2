@@ -1,3 +1,4 @@
+from os import abort
 from config import db
 from flask import jsonify,request
 
@@ -19,7 +20,6 @@ class Project(db.Model):
     def getAllProject(self):
         projects_list = []
         projects = Project.query.all()
-
         [projects_list.append({"pid":project.pid,"pname":project.pname,"user":project.user_id}) for project in projects]
         return jsonify({
         "success":True,
@@ -42,4 +42,36 @@ class Project(db.Model):
             "Success":True,
             "Message":"Project Added"
         })
+    
+    @classmethod
+    def DeleteProject(self,pid):
+        
+        project = Project.query.get(pid)
+       
 
+      
+        db.session.delete(project)
+        db.session.commit()
+
+        return jsonify({
+            "Success":True,
+            "Message":"Project Deleted"
+        })
+
+
+    @classmethod
+    def UpdateProject(self,id):
+        project = Project.query.get(id)
+
+        if project is None:
+            abort(404)
+        else:
+            project.pname = request.json['pname']
+            project.desc = request.json['desc']
+            db.session.add(project)
+            db.session.commit()
+
+            return jsonify({
+                "Success":True,
+                "Message":"Project Updated"
+            })
