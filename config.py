@@ -2,9 +2,10 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask
 from flask_migrate import Migrate
+from flask_cors import CORS
 
 app = Flask(__name__)
-
+CORS(app)
 DB_URL = 'postgresql+psycopg2://postgres:123456@localhost/mydb'
 
 #'postgresql://postgres:123456@localhost:5432/mydb'

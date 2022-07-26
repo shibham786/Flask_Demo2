@@ -1,77 +1,37 @@
 from os import abort
 from config import db
-from flask import jsonify,request
+
+from flask import jsonify, request
+from flask_cors import cross_origin
 
 
 class Project(db.Model):
-    pid = db.Column(db.Integer,primary_key=True)
-    pname = db.Column(db.String(50),unique=True,nullable=False)
-    desc = db.Column(db.String(50),unique=True,nullable=False)
-    user_id = db.Column(db.Integer,db.ForeignKey('user.user_id'),nullable=False)
+    pid = db.Column(db.Integer, primary_key=True)  # change name to meaningfull
+    pname = db.Column(db.String(50), unique=True, nullable=False)
+    desc = db.Column(db.String(50), unique=True, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"), nullable=False)
 
-    def __init__(self,pname,desc,user_id):
+    def __init__(self, pname, desc, user_id):
         self.pname = pname
         self.desc = desc
         self.user_id = user_id
 
-        
-
     @classmethod
     def getAllProject(self):
-        projects_list = []
-        projects = Project.query.all()
-        [projects_list.append({"pid":project.pid,"pname":project.pname,"user":project.user_id}) for project in projects]
-        return jsonify({
-        "success":True,
-        "projects":projects_list,
-    })
+        projects = db.session.query(Project).all()
+        return projects
 
-    @classmethod
     def AddProject(self):
-        project_data = request.json
 
-        pname = project_data['pname']
-        desc = project_data['desc']
-        user_id = project_data['user_id']
-
-        project = Project(pname=pname,desc=desc,user_id=user_id)
-        db.session.add(project)
+        db.session.add(self)
         db.session.commit()
 
-        return jsonify({
-            "Success":True,
-            "Message":"Project Added"
-        })
-    
-    @classmethod
-    def DeleteProject(self,pid):
-        
-        project = Project.query.get(pid)
-       
+    def DeleteProject(self):
 
-      
-        db.session.delete(project)
+        db.session.delete(self)
         db.session.commit()
 
-        return jsonify({
-            "Success":True,
-            "Message":"Project Deleted"
-        })
+    def UpdateProject(self):
 
-
-    @classmethod
-    def UpdateProject(self,id):
-        project = Project.query.get(id)
-
-        if project is None:
-            abort(404)
-        else:
-            project.pname = request.json['pname']
-            project.desc = request.json['desc']
-            db.session.add(project)
-            db.session.commit()
-
-            return jsonify({
-                "Success":True,
-                "Message":"Project Updated"
-            })
+        db.session.add(self)
+        db.session.commit()
