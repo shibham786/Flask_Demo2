@@ -10,8 +10,10 @@ def validation_project_detail(pname: str, desc: str):
     print("=====", not re.match(r"^[A-Za-z]+$", desc), len(desc))
     if not re.match(r"^[A-Za-z]+$", pname):
         return "name only contain alphabets"
-    if re.match(r"^[A-Za-z]+$", desc) and len(desc) <= 10:
-        return "description only contain alphabets and must have 10 characters"
+    if not re.match(r"^[A-Za-z]+$", desc):
+        return "description only contain alphabets"
+    if len(desc) <= 10:
+        return "description must be greater than 10 character"
 
 
 @app.route("/add_projects", methods=["POST"])
@@ -21,7 +23,7 @@ def AddProject():
     pname = project_data["pname"]
     desc = project_data["desc"]
     validate = validation_project_detail(pname, desc)
-    print("validate", validate)
+
     if not validate:
         project = Project(**project_data)
         project.AddProject()
@@ -29,49 +31,53 @@ def AddProject():
     else:
         return jsonify(validate)
 
-    # user_id = project_data["user_id"]
 
-
-@app.route("/getAllProjects", methods=["GET"])
+@app.route("/get_all_projects", methods=["GET"])
 def getAllProjects():
     projects_list = []
     projects = Project.getAllProject()
-    for project in projects:
+
+    [
         projects_list.append(
-            {
-                "pid": project.pid,
-                "pname": project.pname,
-                "desc": project.desc,
-                "userid": project.user_id,
-            }
+            {"pid": project.pid, "pname": project.pname, "desc": project.desc}
         )
-    return jsonify(
-        {
-            "status": 200,
-            "projects": projects_list,
-        }
+        for project in projects
+    ]
+    return (
+        jsonify(
+            {
+                "projects": projects_list,
+            }
+        ),
+        200,
     )
 
 
-@app.route("/DeleteProject/<int:pid>", methods=["DELETE"])
+@app.route("/delete_project/<int:pid>", methods=["DELETE"])
 def DeleteProject(pid):
     project = Project.query.get(pid)
     if project:
 
         project.DeleteProject()
-        return jsonify({"message": "project deleted"})
+        return jsonify({"message": "project deleted"}), 200
     else:
-        return jsonify({"message": "data not found"})
+        return jsonify({"message": "data not found"}), 404
 
 
-@app.route("/UpdateProject/<int:pid>", methods=["PATCH"])
+@app.route("/update_project/<int:pid>", methods=["PATCH"])
 def UpdateProject(pid):
     project = Project.query.get(pid)
 
     if project is None:
         abort(404)
     else:
-        project.pname = request.json["pname"]
-        project.desc = request.json["desc"]
-        project.UpdateProject()
-        return jsonify({"Success": True, "Message": "Project Updated"})
+        validate = validation_project_detail(
+            request.json["pname"], request.json["desc"]
+        )
+        if not validate:
+            project.pname = request.json["pname"]
+            project.desc = request.json["desc"]
+            project.UpdateProject()
+            return jsonify({"Message": "Project Updated"}), 200
+        else:
+            return jsonify(validate), 400

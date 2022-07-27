@@ -6,7 +6,7 @@ from flask import jsonify, request
 import jwt
 
 
-@app.route("/getAllUser", methods=["GET"])
+@app.route("/get_all_users", methods=["GET"])
 def getAllUsers():
     users = User.get()
     user_list = [
@@ -25,7 +25,7 @@ def getAllUsers():
     )
 
 
-@app.route("/getProjectByUser", methods=["GET"])
+@app.route("/get_project_by_user", methods=["GET"])
 def getProjectByUser():
 
     users = User.getProjectByUser()
@@ -41,7 +41,7 @@ def getProjectByUser():
     return jsonify({"status": 200, "data": project_list})
 
 
-@app.route("/AddUser", methods=["POST"])
+@app.route("/add_user", methods=["POST"])
 def AddUser():
 
     user_data = request.json  # type of data
@@ -64,7 +64,7 @@ def AddUser():
     return jsonify({"Success": True, "Message": "User Register SuccessFully"})
 
 
-@app.route("/DeleteUser/<int:id>", methods=["DELETE"])
+@app.route("/delete_user/<int:id>", methods=["DELETE"])
 def DeleteUser(id):
     user = User.query.get(id)
     if user is None:
@@ -74,7 +74,7 @@ def DeleteUser(id):
     return jsonify({"Success": True, "message": "User Deleted success"})
 
 
-@app.route("/UpdateUser/<int:id>", methods=["PATCH"])
+@app.route("/update_user/<int:id>", methods=["PATCH"])
 def UpdateUser(id):
     user = User.query.get(id)
 
@@ -96,14 +96,14 @@ def login_User():
     if user:
         token = jwt.encode(
             {
-                "user_id": user.username,
+                "user_id": user.user_id,
                 "exp": datetime.utcnow() + timedelta(minutes=60),
             },
             app.config["SECRET_KEY"],
             algorithm="HS256",
         )
-        # decode = jwt.decode(token, app.config["SECRET_KEY"], algorithms=["HS256"])
-        # print("decode", decode)
+        decode = jwt.decode(token, app.config["SECRET_KEY"], algorithms=["HS256"])
+        print("decode", decode)
         return jsonify({"status": 200, "token": token})
 
     else:
